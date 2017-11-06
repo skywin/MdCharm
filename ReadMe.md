@@ -1,5 +1,8 @@
 ﻿[MdCharm is no longer maintained!!!](https://github.com/zhangshine/MdCharm/issues/4)
 
+
+***** continue to develop by skywell **
+
 ### Dependencies
 #### Windows
 * Qt Creator + Qt(4.7+)

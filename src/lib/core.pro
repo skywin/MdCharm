@@ -4,19 +4,19 @@ TARGET = core
 
 win32: DEFINES == _EXPORTING
 
-CONFIG += warn_off
+CONFIG += warn_on
 
 unix: CONFIG += static
 
-markdown_parser_c.target = $$PWD/multimarkdown/src/markdown_parser.c
-win32-msvc*: markdown_parser_c.commands = cmd /c $$PWD/multimarkdown/src/markdown_parser.bat
+markdown_parser_c.target = multimarkdown/src/markdown_parser.c #$$PWD/
+win32: markdown_parser_c.commands = cmd /c $$PWD/multimarkdown/src/markdown_parser.bat # -msvc*
 unix: markdown_parser_c.commands = $$PWD/multimarkdown/src/markdown_parser.sh
 markdown_parser_c.depends = markdown_parser_c_nonexist
 markdown_parser_c.CONFIG += recursive
 
 markdown_parser_c_nonexist.commands = @echo generating markdown_parser.c
 QMAKE_EXTRA_TARGETS += markdown_parser_c markdown_parser_c_nonexist
-PRE_TARGETDEPS += $$PWD/multimarkdown/src/markdown_parser.c
+PRE_TARGETDEPS += multimarkdown/src/markdown_parser.c #$$PWD/
 
 #For pcre
 INCLUDEPATH += $$PWD/pcre

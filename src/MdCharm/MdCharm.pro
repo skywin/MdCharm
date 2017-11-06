@@ -194,3 +194,6 @@ FORMS += \
 
 RESOURCES += \
     $$PWD/../res/MdCharm.qrc
+
+OTHER_FILES += \
+    ../res/MdCharmX.rc
