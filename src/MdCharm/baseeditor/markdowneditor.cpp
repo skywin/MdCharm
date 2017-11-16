@@ -6,6 +6,10 @@
 #include <QMimeData>
 #include <QUrl>
 #include <QProcess>
+#include <QMimedata>
+#include <QMessageBox>
+#include <QDateTime>
+#include <ctime>
 
 #include "markdowneditor.h"
 #include "markdowntohtml.h"
@@ -60,6 +64,93 @@ void MarkdownEditor::keyPressEvent(QKeyEvent *event)
             setTextCursor(cursor);
             return;
         }
+    }else if((event->modifiers() & (Qt::ControlModifier|Qt::AltModifier)) == Qt::ControlModifier){
+        if(event->key() == Qt::Key_V){
+            QClipboard *board = QApplication::clipboard();
+            QString str = board->text();
+            QMimeData mdata;
+            if(board->mimeData()->hasImage()){
+                mdata.setImageData(board->mimeData()->imageData());
+                event->accept();
+
+                //find the fold path
+                QDir dir;
+                QString path;
+                QFileInfo  fileinfo(this->parent->getFileModel().getFileFullPath());
+                dir = fileinfo.absoluteDir();
+                path = dir.absolutePath();
+                if(!QDir(path).exists()){
+                    QMessageBox::warning(NULL, "Save Image ERROR", dir.absolutePath()+" not exist.");
+                    return;
+                }
+
+                //select the avaiable name
+                QString timestr = QDateTime::currentDateTime().toString("yyyyMMddHHmmss");
+                QString filename;
+                qsrand(time(NULL));
+                int i;
+                for(i=0;i<20;i++){
+                    int n = qrand();
+                    QString sn;
+                    sn = sn.sprintf("%02x", n).toUpper();
+                    filename = "MDIMG_"+filename.left(20)+"_"+timestr + sn + ".png";
+                    if(!QFile(filename).exists())
+                        break;
+                }
+                if(i == 20){
+                    QMessageBox::warning(NULL, "Save Image ERROR", " can't not generate filename.");
+                    return ;
+                }
+                QString fullpath = path+"/"+filename;
+                fullpath = fullpath.replace("//","/");
+
+                //save image to file
+                QImage img;
+                img = board->mimeData()->imageData().value<QImage>();
+                if(!img.save(fullpath)){//path+"/"+filename
+                    fullpath = QDir::toNativeSeparators(fullpath);
+                    QMessageBox::warning(NULL, "Save Image ERROR", "Write \""+ fullpath + "\" failed!");
+                    return;
+                }
+
+                //insert the link script
+                QString linkscript = "![name](./"+filename+")";
+                QTextCursor cursor = textCursor();
+                cursor.beginEditBlock();
+                cursor.insertText(linkscript);
+                cursor.endEditBlock();
+                setTextCursor(cursor);
+                return;
+            }
+            /*
+            if(board->mimeData()->hasHtml()){
+                event->accept();
+                str = board->mimeData()->html();
+                QTextCursor cursor = textCursor();
+                cursor.beginEditBlock();
+                cursor.insertText(str);
+                cursor.endEditBlock();
+                setTextCursor(cursor);
+                return;
+            }
+            if(board->mimeData()->hasUrls()){
+                event->accept();
+                QTextCursor cursor = textCursor();
+                cursor.beginEditBlock();
+                foreach (QUrl url, board->mimeData()->urls()) {
+                    QString str;
+                    str.append("[urlname](");
+                    str.append(url.toString());
+                    str.append(")");
+                    cursor.insertText(str);
+                }
+                cursor.endEditBlock();
+                setTextCursor(cursor);
+                return;
+            }
+            */
+        }
+
     }
 
     BaseEditor::keyPressEvent(event);
