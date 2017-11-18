@@ -80,7 +80,7 @@ Configuration::Configuration()
             << tr("Markdown"); //Markdown
     fileTypeSuffixString
             << "*.*"                        //All
-            << "*.markdown|*.md|*.mkd";     //Markdown
+            << "*.md|*.markdown|*.mkd";     //Markdown
 }
 
 Configuration::~Configuration()
