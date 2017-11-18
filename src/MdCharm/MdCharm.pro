@@ -12,14 +12,14 @@ lessThan(QT_MAJOR_VERSION, 5){
 
 CONFIG(debug, debug|release){ #debug
     DEFINES += MDCHARM_DEBUG
-    TARGET = MdCharm_d
+    TARGET = MxCharm_d
     DESTDIR = ../debug/
     LIBS += -L../debug -lgbreakpad_d -lcore
 } else { #release
     DEFINES += NDEBUG
     DEFINES += QT_NO_DEBUG_OUTPUT
-    TARGET = MdCharm
-    unix:TARGET = mdcharm
+    TARGET = MxCharm
+    unix:TARGET = mxcharm
     DESTDIR = ../release/
     LIBS += -L../release -lgbreakpad -lcore
 }
