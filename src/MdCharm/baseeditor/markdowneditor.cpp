@@ -93,7 +93,7 @@ void MarkdownEditor::keyPressEvent(QKeyEvent *event)
                     int n = qrand();
                     QString sn;
                     sn = sn.sprintf("%02x", n).toUpper();
-                    filename = "MDIMG_"+filename.left(20)+"_"+timestr + sn + ".png";
+                    filename = "MDIMG_"+fileinfo.baseName().left(20)+"_"+timestr + sn + ".png";
                     if(!QFile(filename).exists())
                         break;
                 }
