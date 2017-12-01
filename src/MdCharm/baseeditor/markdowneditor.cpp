@@ -83,6 +83,18 @@ void MarkdownEditor::keyPressEvent(QKeyEvent *event)
                     QMessageBox::warning(NULL, "Save Image ERROR", dir.absolutePath()+" not exist.");
                     return;
                 }
+                //select the image fold
+                // to do : the imgdir shall be config by user.
+                QString imgdir = "mdimages";
+                if(!path.endsWith('/'))
+                    path = path.append("/");
+                if(!QDir(path+imgdir).exists()){
+                    if(!QDir(path).mkdir(imgdir)){
+                        QMessageBox::warning(NULL, "Make Image dir failed", "Make dir \""+path+imgdir+"\" failed.");
+                        return;
+                    }
+                }
+                path = path.append(imgdir);
 
                 //select the avaiable name
                 QString timestr = QDateTime::currentDateTime().toString("yyyyMMddHHmmss");
@@ -93,8 +105,8 @@ void MarkdownEditor::keyPressEvent(QKeyEvent *event)
                     int n = qrand();
                     QString sn;
                     sn = sn.sprintf("%02x", n).toUpper();
-                    filename = "MDIMG_"+fileinfo.baseName().left(20)+"_"+timestr + sn + ".png";
-                    if(!QFile(filename).exists())
+                    filename = fileinfo.baseName().left(20)+"_"+timestr + sn + ".png";
+                    if(!QFile(path+"/"+filename).exists())
                         break;
                 }
                 if(i == 20){
@@ -114,7 +126,7 @@ void MarkdownEditor::keyPressEvent(QKeyEvent *event)
                 }
 
                 //insert the link script
-                QString linkscript = "![name](./"+filename+")";
+                QString linkscript = "![name]("+imgdir+"/"+filename+")";
                 QTextCursor cursor = textCursor();
                 cursor.beginEditBlock();
                 cursor.insertText(linkscript);
