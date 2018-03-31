@@ -42,8 +42,18 @@ QList<FileNode *>* FileNode::getChildren()
             QFileInfo info(path);
             if(info.isDir()){
                 QDir dir(path);
-                foreach(QFileInfo childInfo, dir.entryInfoList(model->getFilter(), model->getSort())){
-                    children->append(new FileNode(model, childInfo.absoluteFilePath(), this));
+                if(model->bUserFileFilter){
+                    foreach(QFileInfo childInfo, dir.entryInfoList(QDir::AllDirs|QDir::NoDotAndDotDot, model->getSort())){
+                        children->append(new FileNode(model, childInfo.absoluteFilePath(), this));
+                    }
+                    foreach(QFileInfo childInfo, dir.entryInfoList(model->namefilter,model->getFilter(), model->getSort())){
+                        children->append(new FileNode(model, childInfo.absoluteFilePath(), this));
+                    }
+
+                }else{
+                    foreach(QFileInfo childInfo, dir.entryInfoList(model->getFilter(), model->getSort())){
+                        children->append(new FileNode(model, childInfo.absoluteFilePath(), this));
+                    }
                 }
             }
         }
@@ -131,8 +141,14 @@ void FileNode::reload()
         fileInfo = QFileInfo(path);
         if(fileInfo.isDir()){
             QDir dir(path);
-            foreach(QFileInfo childInfo, dir.entryInfoList(model->getFilter(), model->getSort())){
-                children->append(new FileNode(model, childInfo.absoluteFilePath(), this));
+            if(model->bUserFileFilter){
+                foreach(QFileInfo childInfo, dir.entryInfoList(model->namefilter,model->getFilter(), model->getSort())){
+                    children->append(new FileNode(model, childInfo.absoluteFilePath(), this));
+                }
+            }else{
+                foreach(QFileInfo childInfo, dir.entryInfoList(model->getFilter(), model->getSort())){
+                    children->append(new FileNode(model, childInfo.absoluteFilePath(), this));
+                }
             }
         }
     }
@@ -173,6 +189,14 @@ FileSystemModel::FileSystemModel(QObject *parent) :
     iconProvider(new QFileIconProvider),
     fileWatcher(new QFileSystemWatcher(this))
 {
+    namefilter.append("*.md");
+    namefilter.append("*.txt");
+    namefilter.append("*.html");
+    namefilter.append("*.htm");
+    namefilter.append("*.xml");
+    namefilter.append("*.markdown");
+    namefilter.append("*.mkd");
+    namefilter.append("*.txt");
     filters = QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot;
     sorts = QDir::DirsFirst | QDir::Name |QDir::Type;
 }
@@ -182,6 +206,13 @@ FileSystemModel::~FileSystemModel()
     delete rootNode;
     delete iconProvider;
     delete fileWatcher;
+}
+
+void FileSystemModel::setFileFilter(const QStringList & filefilter)
+{
+    this->bUserFileFilter = 1;
+    this->namefilter = filefilter;
+
 }
 
 QFileSystemWatcher* FileSystemModel::getFileWatcher() const

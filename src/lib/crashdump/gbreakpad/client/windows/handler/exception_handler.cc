@@ -38,6 +38,7 @@
 #include "client/windows/common/ipc_protocol.h"
 #include "client/windows/handler/exception_handler.h"
 #include "common/windows/guid_string.h"
+#define STATUS_INVALID_PARAMETER 0xC000000D
 
 namespace google_breakpad {
 

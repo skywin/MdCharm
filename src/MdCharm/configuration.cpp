@@ -4,6 +4,7 @@
 #include <QTextStream>
 #include <QtCore>
 #include <QCoreApplication>
+#include <QMessageBox>
 
 #include "configuration.h"
 #include "version.h"
@@ -291,6 +292,8 @@ Configuration* Configuration::getInstance()
 void Configuration::writeSystemInfo()
 {
     QFile sysinfoFile(configFileDirPath()+"/sysinfo.txt");
+    //find the config dir.
+    //QMessageBox::warning(NULL, "Config file name", sysinfoFile.fileEngine()->AbsolutePathName + sysinfoFile.fileName());
 //    if(sysinfoFile.exists())
 //        return;
     if(!sysinfoFile.open(QIODevice::WriteOnly))

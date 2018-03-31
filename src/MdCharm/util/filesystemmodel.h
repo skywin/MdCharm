@@ -52,6 +52,9 @@ public:
     QList<QModelIndex> findPaths(const QString &path) const;
     FileNode* nodeFromIndex(const QModelIndex &index) const;
     QFileInfo fileInfo(const QModelIndex &index) const;
+    QStringList namefilter;
+    void setFileFilter(const QStringList &);
+    bool bUserFileFilter;
 protected:
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual int columnCount(const QModelIndex &parent=QModelIndex()) const;
@@ -71,6 +74,7 @@ private:
     QFileSystemWatcher *fileWatcher;
     QDir::Filters filters;
     QDir::SortFlags sorts;
+
 };
 
 #endif // FILESYSTEMMODEL_H

@@ -22,6 +22,18 @@ void ProjectDockWidget::initGui()
     setAcceptDrops(true);
     fileSystemModel = new FileSystemModel(this);
     fileSystemModel->setFilter(QDir::AllEntries|QDir::NoDotAndDotDot);
+    QStringList namefilter;
+    namefilter.append("*.md");
+    namefilter.append("*.txt");
+    namefilter.append("*.html");
+    namefilter.append("*.htm");
+    namefilter.append("*.xml");
+    namefilter.append("*.markdown");
+    namefilter.append("*.mkd");
+    namefilter.append("*.txt");
+    namefilter.append("*.jpg");
+    namefilter.append("*.png");
+    fileSystemModel->setFileFilter(namefilter);
     projectTreeView = new FileSystemTreeView(this);
     ui->verticalLayout->addWidget(projectTreeView);
     projectTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
