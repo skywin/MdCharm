@@ -213,9 +213,11 @@ EditAreaWidget* EditAreaTabWidgetManager::addNewTabWidget(EditAreaTabWidget *vie
             }
             newFile.close();
         }
-        if(!projectDir.isEmpty() && formatFilePath.startsWith(projectDir))
+        // mask these for local image pasted locate according to file not project dir.
+        // url shall be same as file not project dir.
+/*        if(!projectDir.isEmpty() && formatFilePath.startsWith(projectDir))
             baseUrl = QUrl::fromLocalFile(projectDir+"/");
-        else
+        else*/
             baseUrl = QUrl::fromLocalFile(filePath);
     }
     MarkdownEditAreaWidget *ret = addMarkdownEditAreaWidget(view, formatFilePath, baseUrl, formatFilePath.isEmpty() ? ++newFileId:0);
