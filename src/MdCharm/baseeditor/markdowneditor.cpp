@@ -25,8 +25,12 @@ MarkdownEditor::MarkdownEditor(MarkdownEditAreaWidget *parent):
 {
     mdcharmGlobalInstance = MdCharmGlobal::getInstance();
     copyAsHtmlAction = new QAction(tr("Copy as Html"), this);
+    pasteAsHtmlAction = new QAction(tr("Paste as Html"), this);
+    pasteAsImageAction = new QAction(tr("Paste as Image"), this);
     autoCompleter = new MarkdownAutoCompleter(this);
     connect(copyAsHtmlAction, SIGNAL(triggered()), this, SLOT(copyAsHtmlSlot()));
+    connect(pasteAsHtmlAction, SIGNAL(triggered()), this, SLOT(pasteAsHtmlSlot()));
+    connect(pasteAsImageAction, SIGNAL(triggered()), this, SLOT(pasteAsImageSlot()));
     setFrameShape(QTextEdit::NoFrame);
     setAcceptDrops(true);
 }
@@ -64,108 +68,150 @@ void MarkdownEditor::keyPressEvent(QKeyEvent *event)
             setTextCursor(cursor);
             return;
         }
-    }else if((event->modifiers() & (Qt::ControlModifier|Qt::AltModifier)) == Qt::ControlModifier){
+    } else if((event->modifiers() & (Qt::ControlModifier|Qt::AltModifier)) == Qt::ControlModifier){
         if(event->key() == Qt::Key_V){
-            QClipboard *board = QApplication::clipboard();
-            QString str = board->text();
-            QMimeData mdata;
-            if(board->mimeData()->hasImage()){
-                mdata.setImageData(board->mimeData()->imageData());
-                event->accept();
 
-                //find the fold path
-                QDir dir;
-                QString path;
-                QFileInfo  fileinfo(this->parent->getFileModel().getFileFullPath());
-                dir = fileinfo.absoluteDir();
-                path = dir.absolutePath();
-                if(!QDir(path).exists()){
-                    QMessageBox::warning(NULL, "Save Image ERROR", dir.absolutePath()+" not exist.");
-                    return;
-                }
-                //select the image fold
-                // to do : the imgdir shall be config by user.
-                QString imgdir = "mdimages";
-                if(!path.endsWith('/'))
-                    path = path.append("/");
-                if(!QDir(path+imgdir).exists()){
-                    if(!QDir(path).mkdir(imgdir)){
-                        QMessageBox::warning(NULL, "Make Image dir failed", "Make dir \""+path+imgdir+"\" failed.");
-                        return;
-                    }
-                }
-                path = path.append(imgdir);
-
-                //select the avaiable name
-                QString timestr = QDateTime::currentDateTime().toString("yyyyMMddHHmmss");
-                QString filename;
-                qsrand(time(NULL));
-                int i;
-                for(i=0;i<20;i++){
-                    int n = qrand();
-                    QString sn;
-                    sn = sn.sprintf("%02x", n).toUpper();
-                    filename = fileinfo.baseName().left(20)+"_"+timestr + sn + ".png";
-                    if(!QFile(path+"/"+filename).exists())
-                        break;
-                }
-                if(i == 20){
-                    QMessageBox::warning(NULL, "Save Image ERROR", " can't not generate filename.");
-                    return ;
-                }
-                QString fullpath = path+"/"+filename;
-                fullpath = fullpath.replace("//","/");
-
-                //save image to file
-                QImage img;
-                img = board->mimeData()->imageData().value<QImage>();
-                if(!img.save(fullpath)){//path+"/"+filename
-                    fullpath = QDir::toNativeSeparators(fullpath);
-                    QMessageBox::warning(NULL, "Save Image ERROR", "Write \""+ fullpath + "\" failed!");
-                    return;
-                }
-
-                //insert the link script
-                QString linkscript = "![name]("+imgdir+"/"+filename+")";
-                QTextCursor cursor = textCursor();
-                cursor.beginEditBlock();
-                cursor.insertText(linkscript);
-                cursor.endEditBlock();
-                setTextCursor(cursor);
-                return;
-            }
-            /*
-            if(board->mimeData()->hasHtml()){
-                event->accept();
-                str = board->mimeData()->html();
-                QTextCursor cursor = textCursor();
-                cursor.beginEditBlock();
-                cursor.insertText(str);
-                cursor.endEditBlock();
-                setTextCursor(cursor);
-                return;
-            }
-            if(board->mimeData()->hasUrls()){
-                event->accept();
-                QTextCursor cursor = textCursor();
-                cursor.beginEditBlock();
-                foreach (QUrl url, board->mimeData()->urls()) {
-                    QString str;
-                    str.append("[urlname](");
-                    str.append(url.toString());
-                    str.append(")");
-                    cursor.insertText(str);
-                }
-                cursor.endEditBlock();
-                setTextCursor(cursor);
-                return;
-            }
-            */
         }
 
     }
 
     BaseEditor::keyPressEvent(event);
+}
+
+//Add for image insert from clipboard by skywell @@20180424
+//move from keyPressEvent, called as a content menu action
+void MarkdownEditor::pasteAsImageSlot()
+{
+
+    QClipboard *board = QApplication::clipboard();
+    QString str = board->text();
+    QMimeData mdata;
+    if(board->mimeData()->hasImage()){
+        mdata.setImageData(board->mimeData()->imageData());
+
+        //find the fold path
+        QDir dir;
+        QString path;
+        QFileInfo  fileinfo(this->parent->getFileModel().getFileFullPath());
+        dir = fileinfo.absoluteDir();
+        path = dir.absolutePath();
+        if(!QDir(path).exists()){
+            QMessageBox::warning(NULL, "Save Image ERROR", dir.absolutePath()+" not exist.");
+            return;
+        }
+        //select the image fold
+        // to do : the imgdir shall be config by user.
+        QString imgdir = "mdimages";
+        if(!path.endsWith('/'))
+            path = path.append("/");
+        if(!QDir(path+imgdir).exists()){
+            if(!QDir(path).mkdir(imgdir)){
+                QMessageBox::warning(NULL, "Make Image dir failed", "Make dir \""+path+imgdir+"\" failed.");
+                return;
+            }
+        }
+        path = path.append(imgdir);
+
+        //select the avaiable name
+        QString timestr = QDateTime::currentDateTime().toString("yyyyMMddHHmmss");
+        QString filename;
+        qsrand(time(NULL));
+        int i;
+        for(i=0;i<20;i++){
+            int n = qrand();
+            QString sn;
+            sn = sn.sprintf("%02x", n).toUpper();
+            filename = fileinfo.baseName().left(20)+"_"+timestr + sn + ".png";
+            if(!QFile(path+"/"+filename).exists())
+                break;
+        }
+        if(i == 20){
+            QMessageBox::warning(NULL, "Save Image ERROR", " can't not generate filename.");
+            return ;
+        }
+        QString fullpath = path+"/"+filename;
+        fullpath = fullpath.replace("//","/");
+
+        //save image to file
+        QImage img;
+        img = board->mimeData()->imageData().value<QImage>();
+        if(!img.save(fullpath)){//path+"/"+filename
+            fullpath = QDir::toNativeSeparators(fullpath);
+            QMessageBox::warning(NULL, "Save Image ERROR", "Write \""+ fullpath + "\" failed!");
+            return;
+        }
+
+        //insert the link script
+        QString linkscript = "![name]("+imgdir+"/"+filename+")";
+        QTextCursor cursor = textCursor();
+        cursor.beginEditBlock();
+        cursor.insertText(linkscript);
+        cursor.endEditBlock();
+        setTextCursor(cursor);
+        return;
+    }
+
+}
+
+void MarkdownEditor::pasteAsHtmlSlot()
+{
+    /* not ready yet @20180424
+    QClipboard *board = QApplication::clipboard();
+    QString str = board->text();
+    QMimeData mdata;
+    if(board->mimeData()->hasHtml()){
+        event->accept();
+        str = board->mimeData()->html();
+        QTextCursor cursor = textCursor();
+        cursor.beginEditBlock();
+        cursor.insertText(str);
+        cursor.endEditBlock();
+        setTextCursor(cursor);
+        return;
+    }
+    if(board->mimeData()->hasUrls()){
+        event->accept();
+        QTextCursor cursor = textCursor();
+        cursor.beginEditBlock();
+        foreach (QUrl url, board->mimeData()->urls()) {
+            QString str;
+            str.append("[urlname](");
+            str.append(url.toString());
+            str.append(")");
+            cursor.insertText(str);
+        }
+        cursor.endEditBlock();
+        setTextCursor(cursor);
+        return;
+    }
+    */
+
+}
+
+bool MarkdownEditor::checkClipboardHas( int type)
+{
+    QClipboard *board = QApplication::clipboard();
+    switch(type){
+    case CLIPBOARD_THTML:
+        if(board->mimeData()->hasHtml())
+            return true;
+        break;
+    case CLIPBOARD_TIMAGE:
+        if(board->mimeData()->hasImage())
+            return true;
+        break;
+    case CLIPBOARD_TTEXT:
+        if(board->mimeData()->hasText())
+            return true;
+        break;
+    case CLIPBOARD_TURL:
+        if(board->mimeData()->hasUrls())
+            return true;
+        break;
+    }
+    return false;
+
+
 }
 
 void MarkdownEditor::contextMenuEvent(QContextMenuEvent *e)
@@ -182,6 +228,10 @@ void MarkdownEditor::contextMenuEvent(QContextMenuEvent *e)
     menu->addSeparator();
     copyAsHtmlAction->setEnabled(textCursor().hasSelection());
     menu->addAction(copyAsHtmlAction);
+    pasteAsHtmlAction->setEnabled(checkClipboardHas(CLIPBOARD_THTML));
+    pasteAsImageAction->setEnabled(checkClipboardHas(CLIPBOARD_TIMAGE));
+    menu->addAction(pasteAsHtmlAction);
+    menu->addAction(pasteAsImageAction);
     QList<QAction *> spellCheckActions;
     if(e->reason()==QContextMenuEvent::Mouse&&!textCursor().hasSelection()){
         setTextCursor(cursorForPosition(e->pos()));
@@ -588,6 +638,9 @@ void MarkdownEditor::copyAsHtmlSlot()
     QClipboard *clipboard = QApplication::clipboard();
     clipboard->setText(QString::fromUtf8(textResult.c_str(), textResult.length()));
 }
+
+
+
 
 QList<QAction *> MarkdownEditor::addSpellCheckActions(QMenu *menu)
 {

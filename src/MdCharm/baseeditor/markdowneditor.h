@@ -33,14 +33,20 @@ public:
     void insertCode(const QString &lan);
 private:
     void replaceTextInCurrentCursor(const QString &text);
+    enum {CLIPBOARD_TTEXT=1,CLIPBOARD_THTML=2,CLIPBOARD_TIMAGE=3,CLIPBOARD_TURL=4};
+    bool checkClipboardHas( int type);
 private slots:
     void copyAsHtmlSlot();
+    void pasteAsHtmlSlot();
+    void pasteAsImageSlot();
 private:
     QList<QAction *> addSpellCheckActions(QMenu *menu);
     QList<QAction *> addSpellCheckLanguageActions(QMenu *menu);
 private:
     MdCharmGlobal *mdcharmGlobalInstance;
     QAction *copyAsHtmlAction;
+    QAction *pasteAsHtmlAction;
+    QAction *pasteAsImageAction;
     MarkdownAutoCompleter *autoCompleter;
     MarkdownEditAreaWidget *parent;
 };
