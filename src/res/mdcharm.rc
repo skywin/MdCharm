@@ -1,0 +1,31 @@
+IDI_ICON1	ICON	DISCARDABLE	"mdcharm.ico"
+IDI_ICON2	ICON	DISCARDABLE	"markdown\markdown.ico"
+
+1 VERSIONINFO
+FILEVERSION 2,0,2,0
+PRODUCTVERSION 2,0,2,0
+FILEOS      0x4
+FILETYPE    0x1
+{
+BLOCK "StringFileInfo"
+{
+	BLOCK "040904E4"
+	{
+		VALUE "CompanyName", "MxCharm"
+		VALUE "FileDescription", "MxCharm-Wiki Editor [msvc]"
+		VALUE "FileVersion", "2.0.2"
+		VALUE "InternalName", "MxCharm"
+		VALUE "LegalCopyright", "(C) MxCharm. 2017-2017"
+		VALUE "LegalTrademarks", ""
+		VALUE "OriginalFilename", "MxCharm"
+		VALUE "ProductName", "MxCharm"
+		VALUE "ProductVersion", "2.0.2"
+		VALUE "Comments", ""
+		VALUE "Aditional Notes", "MxCharm"
+	}
+}
+BLOCK "VarFileInfo"
+{
+	VALUE "Translation",0x0409,0x04E4
+}
+}
